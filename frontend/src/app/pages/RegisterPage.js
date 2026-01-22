@@ -5,18 +5,44 @@ export function RegisterPage() {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    phoneNumber: '',
     password: '',
     confirmPassword: '',
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match!');
       return;
     }
-    alert('Registration successful! Welcome to YUNI!');
-    setFormData({ fullName: '', email: '', password: '', confirmPassword: '' });
+
+    try {
+      const response = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          password: formData.password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Registration successful! Welcome to YUNI!');
+        setFormData({ fullName: '', email: '', phoneNumber: '', password: '', confirmPassword: '' });
+      } else {
+        alert(`Registration failed: ${data.msg || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Could not connect to the server. Please ensure the backend is running.');
+    }
   };
 
   const handleChange = (e) => {
@@ -171,6 +197,19 @@ export function RegisterPage() {
                   onChange={handleChange}
                   style={styles.input}
                   placeholder="Enter your email"
+                  required
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Phone Number</label>
+                <input
+                  className="register-input"
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  style={styles.input}
+                  placeholder="Enter your phone number"
                   required
                 />
               </div>
