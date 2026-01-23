@@ -17,6 +17,13 @@ export function RegisterPage() {
       return;
     }
 
+    // Validate Pakistani phone number format
+    const pakistaniPhoneRegex = /^(\+92|0)?3[0-9]{2}-?[0-9]{7}$/;
+    if (!pakistaniPhoneRegex.test(formData.phoneNumber.replace(/\s/g, ''))) {
+      alert('Please enter a valid Pakistani phone number (e.g., 0300-1234567 or +92-300-1234567)');
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:5000/api/register', {
         method: 'POST',

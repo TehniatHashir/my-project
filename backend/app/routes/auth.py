@@ -9,6 +9,14 @@ auth_bp = Blueprint('auth', __name__)
 def is_valid_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
+def is_valid_pakistani_phone(phone):
+    """Validate Pakistani phone number format: 03XX-XXXXXXX or +92-3XX-XXXXXXX"""
+    # Remove spaces for validation
+    phone_clean = phone.replace(' ', '')
+    # Pattern: Optional +92 or 0, then 3XX-XXXXXXX (with or without hyphen)
+    pattern = r'^(\+92|0)?3[0-9]{2}-?[0-9]{7}$'
+    return re.match(pattern, phone_clean)
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -26,6 +34,12 @@ def register():
 
     if not is_valid_email(email):
         return jsonify({"msg": "Invalid email format"}), 400
+
+    if not phoneNumber:
+        return jsonify({"msg": "Phone number is required"}), 400
+
+    if not is_valid_pakistani_phone(phoneNumber):
+        return jsonify({"msg": "Invalid Pakistani phone number format. Use format: 0300-1234567 or +92-300-1234567"}), 400
 
     if User.query.filter_by(email=email).first():
         return jsonify({"msg": "Email already registered"}), 409
